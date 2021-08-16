@@ -295,7 +295,7 @@ services:
   relay:
     <<: *restart_policy
     ports:
-        - "3000:3000/tcp"
+        - "9001:3000/tcp"
     image: "$RELAY_IMAGE"
     volumes:
       - type: bind
