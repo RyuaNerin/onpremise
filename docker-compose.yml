@@ -118,7 +118,7 @@ services:
   postgres:
     <<: *restart_policy
     ports:
-      - "5432:5432/tcp"
+      - "10.0.0.1:5432:5432/tcp"
     image: "postgres:9.6"
     healthcheck:
       <<: *healthcheck_defaults
@@ -290,7 +290,7 @@ services:
   web:
     <<: *sentry_defaults
     ports:
-        - "9000:9000/tcp"
+        - "127.0.0.1:9000:9000/tcp"
     healthcheck:
       <<: *healthcheck_defaults
       test:
@@ -343,7 +343,7 @@ services:
   relay:
     <<: *restart_policy
     ports:
-        - "9001:3000/tcp"
+        - "127.0.0.1:9001:3000/tcp"
     image: "$RELAY_IMAGE"
     volumes:
       - type: bind
