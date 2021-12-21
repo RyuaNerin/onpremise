@@ -69,6 +69,9 @@ target/
 # https://docs.docker.com/compose/extends/
 docker-compose.override.yml
 
+# https://docs.docker.com/compose/environment-variables/#using-the---env-file--option
+.env.custom
+
 *.tar
 data/
 .vscode/tags
@@ -87,9 +90,6 @@ geoip/.geoipupdate.lock
 
 # wal2json download
 postgres/wal2json
-
-# custom certificate authorities
-certificates
 
 # integration testing
 _integration-test/custom-ca-roots/nginx/*

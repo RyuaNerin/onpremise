@@ -1,4 +1,4 @@
-# Self-Hosted Sentry 21.8.0
+# Self-Hosted Sentry 21.12.0
 
 Official bootstrap for running your own [Sentry](https://sentry.io/) with [Docker](https://www.docker.com/).
 
@@ -12,9 +12,19 @@ Official bootstrap for running your own [Sentry](https://sentry.io/) with [Docke
 
 ## Setup
 
+### Customize DotEnv (.env) file
+
+Environment specific configurations can be done in the `.env.custom` file. It will be located in the root directory of the Sentry installation.
+
+By default, there exists no `.env.custom` file. In this case, you can manually add this file by copying the `.env` file to a new `.env.custom` file and adjust your settings in the `.env.custom` file.
+
+Please keep in mind to check the `.env` file for changes, when you perform an upgrade of Sentry, so that you can adjust your `.env.custom` accordingly, if required.
+
+### Installation
+
 To get started with all the defaults, simply clone the repo and run `./install.sh` in your local check-out. Sentry uses Python 3 by default since December 4th, 2020 and Sentry 21.1.0 is the last version to support Python 2.
 
-During the install, a prompt will ask if you want to create a user account. If you require that the install not be blocked by the prompt, run `./install.sh --no-user-prompt`.
+During the install, a prompt will ask if you want to create a user account. If you require that the install not be blocked by the prompt, run `./install.sh --skip-user-prompt`.
 
 Please visit [our documentation](https://develop.sentry.dev/self-hosted/) for everything else.
 
@@ -38,26 +48,14 @@ Note that this may not work for all commit SHAs as this repository evolves with 
 
 ### Using Linux
 
-If you are using Linux and you need to use `sudo` when running `./install.sh`, modifying the version of Sentry is slightly different. First, run the following:
+If you are using Linux and you need to use `sudo` when running `./install.sh`, make sure to place the environment variable *after* `sudo`:
 
 ```shell
-sudo visudo
-```
-
-Then add the following line:
-
-```shell
-Defaults  env_keep += "SENTRY_IMAGE"
-```
-
-Save the file then in your terminal run the following
-
-```shell
-export SENTRY_IMAGE=us.gcr.io/sentryio/sentry:83b1380
-sudo ./install.sh
+sudo SENTRY_IMAGE=us.gcr.io/sentryio/sentry:83b1380 ./install.sh
 ```
 
 Where you replace `83b1380` with the sha you want to use.
 
-[build-status-image]: https://github.com/getsentry/onpremise/workflows/test/badge.svg
+[build-status-image]: https://github.com/getsentry/self-hosted/workflows/test/badge.svg
 [build-status-url]: https://git.io/JUYkh
+

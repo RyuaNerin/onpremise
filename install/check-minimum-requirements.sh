@@ -1,30 +1,30 @@
 echo "${_group}Checking minimum requirements ..."
 
-MIN_DOCKER_VERSION='19.03.6'
-MIN_COMPOSE_VERSION='1.28.0'
-MIN_RAM_HARD=3800 # MB
-MIN_RAM_SOFT=7800 # MB
-MIN_CPU_HARD=2
-MIN_CPU_SOFT=4
-
-DOCKER_VERSION=$(docker version --format '{{.Server.Version}}')
-COMPOSE_VERSION=$($dc --version | sed 's/docker-compose version \(.\{1,\}\),.*/\1/')
-RAM_AVAILABLE_IN_DOCKER=$(docker run --rm busybox free -m 2>/dev/null | awk '/Mem/ {print $2}');
-CPU_AVAILABLE_IN_DOCKER=$(docker run --rm busybox nproc --all);
+source "$(dirname $0)/_min-requirements.sh"
 
 # Compare dot-separated strings - function below is inspired by https://stackoverflow.com/a/37939589/808368
 function ver () { echo "$@" | awk -F. '{ printf("%d%03d%03d", $1,$2,$3); }'; }
 
+DOCKER_VERSION=$(docker version --format '{{.Server.Version}}')
 if [[ "$(ver $DOCKER_VERSION)" -lt "$(ver $MIN_DOCKER_VERSION)" ]]; then
   echo "FAIL: Expected minimum Docker version to be $MIN_DOCKER_VERSION but found $DOCKER_VERSION"
   exit 1
 fi
 
-if [[ "$(ver $COMPOSE_VERSION)" -lt "$(ver $MIN_COMPOSE_VERSION)" ]]; then
-  echo "FAIL: Expected minimum docker-compose version to be $MIN_COMPOSE_VERSION but found $COMPOSE_VERSION"
-  exit 1
+if docker compose version &>/dev/null; then
+  # If `docker compose` exists then it's guaranteed to be Docker Compose v2, which is good enough for us.
+  true
+else
+  # If we have `docker-compose` instead then it could be either v1 or v2 (also, use portable sed).
+  # See https://github.com/getsentry/self-hosted/issues/1132#issuecomment-982823712 ff. for regex testing.
+  COMPOSE_VERSION=$(docker-compose version | head -n1 | sed -E 's/^.* version:? v?([0-9.]+),?.*$/\1/')
+  if [[ "$(ver $COMPOSE_VERSION)" -lt "$(ver $MIN_COMPOSE_VERSION)" ]]; then
+    echo "FAIL: Expected minimum docker-compose version to be $MIN_COMPOSE_VERSION but found $COMPOSE_VERSION"
+    exit 1
+  fi
 fi
 
+CPU_AVAILABLE_IN_DOCKER=$(docker run --rm busybox nproc --all);
 if [[ "$CPU_AVAILABLE_IN_DOCKER" -lt "$MIN_CPU_HARD" ]]; then
   echo "FAIL: Required minimum CPU cores available to Docker is $MIN_CPU_HARD, found $CPU_AVAILABLE_IN_DOCKER"
   exit 1
@@ -32,6 +32,7 @@ elif [[ "$CPU_AVAILABLE_IN_DOCKER" -lt "$MIN_CPU_SOFT" ]]; then
   echo "WARN: Recommended minimum CPU cores available to Docker is $MIN_CPU_SOFT, found $CPU_AVAILABLE_IN_DOCKER"
 fi
 
+RAM_AVAILABLE_IN_DOCKER=$(docker run --rm busybox free -m 2>/dev/null | awk '/Mem/ {print $2}');
 if [[ "$RAM_AVAILABLE_IN_DOCKER" -lt "$MIN_RAM_HARD" ]]; then
   echo "FAIL: Required minimum RAM available to Docker is $MIN_RAM_HARD MB, found $RAM_AVAILABLE_IN_DOCKER MB"
   exit 1
